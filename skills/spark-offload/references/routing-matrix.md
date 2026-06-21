@@ -11,6 +11,7 @@ Use this file when deciding whether to delegate to GPT-5.3-Codex-Spark.
 | Search codebase for owners/call paths | Read-heavy and bounded | Open cited files and verify line refs |
 | Create fixtures, examples, or docs drafts | Low-risk first-pass writing | Review semantics and style |
 | Mechanical change over disjoint files | Parallelizable and easy to diff | Inspect diff and run formatting/tests |
+| Extract repeated PDF/document fields | Repetitive and observable | Spot-check against source pages |
 
 ## Conditional
 
@@ -19,13 +20,16 @@ Use this file when deciding whether to delegate to GPT-5.3-Codex-Spark.
 | Small bug fix | The failure mode is already understood | Assign exact files and tests |
 | Refactor | Files are disjoint and behavior is covered | One agent per ownership slice |
 | Browser or computer-use QA | Action is read-only or explicitly approved | Require visible evidence and stop before irreversible actions |
-| External research | It is low-stakes or just lead generation | Parent opens/reads sources before citing |
+| External research | Spark only gathers leads or extracts narrow facts | Parent opens/reads sources before citing or synthesizing |
+| Large codebase understanding | Spark only maps files, entrypoints, and local evidence | Parent performs architecture judgment |
+| Exam/question/artifact analysis | Spark only extracts observable structure | Parent performs final quality/difficulty/meaning judgment |
 
 ## No
 
 | Work type | Reason |
 | --- | --- |
 | Final architecture choice | Needs broad context and tradeoff judgment |
+| Deep synthesis or prioritization | Requires strong model judgment over many constraints |
 | Security verdict | False negatives are costly |
 | Legal/medical/financial/tax recommendation | High-stakes source and reasoning burden |
 | Cross-module migration | Coordination overhead can exceed speed benefit |

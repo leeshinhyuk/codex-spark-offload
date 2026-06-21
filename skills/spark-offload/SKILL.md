@@ -1,11 +1,13 @@
 ---
 name: spark-offload
-description: "Delegate simple, repetitive, low-risk, or parallelizable Codex work to GPT-5.3-Codex-Spark subagents while the main agent handles planning, verification, integration, and final judgment. Use when the user explicitly invokes $spark-offload, asks to use Spark for easy subtasks, wants many code candidates/variants, repetitive transformations, broad-but-shallow exploration, log/test triage, or says subagent/parallel delegation is allowed. Do not use for final architecture, security verdicts, high-stakes decisions, or unreviewed code integration."
+description: "Delegate low-responsibility Codex work to GPT-5.3-Codex-Spark subagents while the main agent handles planning, verification, integration, and final judgment. Use when the user explicitly invokes $spark-offload, asks to use Spark for bounded subtasks, wants many code/design candidates, repetitive document/PDF/artifact transformations, broad-but-shallow scouting, evidence extraction, log/test triage, or says subagent/parallel delegation is allowed. Do not use Spark for final architecture, deep synthesis, security verdicts, high-stakes decisions, or unreviewed code integration."
 ---
 
 # Spark Offload
 
-Use this skill to spend GPT-5.3-Codex-Spark on small work that benefits from speed, parallelism, and cheap iteration. The main agent remains accountable for requirements, decomposition, verification, integration, and final decisions.
+Use this skill to spend GPT-5.3-Codex-Spark on work that benefits from speed, parallelism, and cheap iteration. The main agent remains accountable for requirements, decomposition, verification, integration, and final decisions.
+
+The governing rule: Spark may produce cheap, inspectable subproducts; the main agent must verify and decide.
 
 Explicit `$spark-offload` invocation is user authorization to use Spark subagents and parallel delegation for this turn, subject to the current runtime tools and safety policy.
 
@@ -20,6 +22,7 @@ This skill is based on the documented Codex pattern of subagents plus custom age
 
 Read `references/web-findings.md` when you need the research basis or comparable public examples.
 Read `references/routing-matrix.md` when delegation boundaries are unclear.
+Read `references/verification-contract.md` before accepting Spark output for a final answer or patch.
 
 ## Delegation Rule
 
@@ -34,8 +37,19 @@ Do not offload:
 
 - Final architecture, release, legal, financial, medical, security, or safety decisions.
 - Cross-cutting edits without clear file ownership.
-- Tasks requiring broad long-context synthesis or nuanced prioritization.
+- Tasks requiring broad long-context synthesis or nuanced prioritization, except for raw evidence extraction.
 - Anything the main agent cannot inspect or validate.
+
+## Responsibility Ladder
+
+Use this ladder before delegation:
+
+| Tier | Spark authority | Examples | Main-agent duty |
+| --- | --- | --- | --- |
+| Green | Can execute bounded work | repetitive docs/PDF cleanup, fixtures, formatting checks, log summaries | inspect result and run obvious checks |
+| Yellow | Can produce candidates or scouting notes | implementation variants, codebase map, source/repo leads, UI copy | verify evidence, select, and integrate |
+| Orange | Evidence extraction only | broad research, large codebase understanding, exam/question analysis, product/game strategy | redo synthesis and judgment in the main model |
+| Red | No delegation | final architecture, security verdict, financial/legal/medical choice, release decision | keep in main thread or expert review |
 
 ## Good Spark Work
 
@@ -48,6 +62,8 @@ Use one or more Spark subagents for:
 - Comparing small alternatives against explicit criteria.
 - Drafting docs, comments, changelog entries, fixtures, or migration notes for review.
 - Producing throwaway prototypes or scratch patches that the main agent may reject.
+- Extracting facts from repeated PDFs, documents, slides, logs, or generated artifacts.
+- Gathering research/source/repo leads for later main-agent verification.
 
 ## Agent Selection
 
@@ -61,6 +77,7 @@ If custom agents are available, prefer these names:
 - `spark_scout`: read-only exploration, mapping, search, log/test triage.
 - `spark_candidate`: multiple code or design candidates; may edit only an explicitly assigned scratch or disjoint write scope.
 - `spark_repeater`: repetitive transformations, fixture generation, renames, or mechanical cleanup.
+- `spark_evidence`: evidence extraction from sources, documents, logs, questions, or repo slices; no final synthesis.
 
 Use built-in `explorer` or `worker` with `model = "gpt-5.3-codex-spark"` when the custom names are not loaded.
 
@@ -74,6 +91,7 @@ Every Spark handoff must include:
 - `Output`: required summary shape.
 - `Stop condition`: when to stop instead of improvising.
 - `Confidence`: require `known`, `likely`, `uncertain`, or `blocked`.
+- `Evidence`: require raw support such as file path, line, command output, URL, screenshot note, or exact observed text when relevant.
 
 Template:
 
@@ -85,6 +103,7 @@ Allowed writes: <none|scratch only|exact files>
 Output: <bullets/table/diff summary/candidate list>
 Stop condition: stop and report blocked if <condition>
 Confidence: label each claim or candidate known/likely/uncertain/blocked.
+Evidence: include raw support for every claim the parent may rely on.
 Do not make final decisions. The parent agent will verify and integrate.
 ```
 
@@ -96,6 +115,7 @@ Use parallel Spark agents when work naturally separates:
 - File sharding: one agent per disjoint file group.
 - Review sharding: one agent checks tests, one docs, one edge cases.
 - Search fanout: one agent maps source code, one checks docs, one checks logs.
+- Evidence fanout: one agent extracts facts from documents, one extracts code references, one gathers external leads.
 
 Keep batches small by default. Start with 2-4 agents; exceed that only when the user asks for breadth or the work is highly mechanical.
 
@@ -111,6 +131,8 @@ The main agent must:
 6. Tell the user when Spark results were used and what was verified.
 
 Never present Spark output as final just because it is fast. Treat it as cheap search, cheap variation, or cheap first-pass execution.
+
+Reject Spark output by default when it lacks evidence handles, confidence labels, or a verification path.
 
 ## Failure Handling
 

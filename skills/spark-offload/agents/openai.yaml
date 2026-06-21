@@ -1,0 +1,7 @@
+interface:
+  display_name: "Spark Offload"
+  short_description: "Offload easy subtasks to Spark agents"
+  default_prompt: "Use $spark-offload to delegate simple, repetitive, low-risk subtasks to Spark subagents and integrate only after review."
+
+policy:
+  allow_implicit_invocation: false
